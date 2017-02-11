@@ -1,0 +1,5 @@
+{
+	add this function to barbershop/api/controller/controller.php
+	loadUsersAppliedJobs(user_id).
+	can be found in the local controller file in line 1406
+}
