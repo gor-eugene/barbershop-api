@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/../config/k.php';
 require_once __DIR__ .  '/../../api/controller/Controller.php';
-require_once __DIR_ . '/../config/jwt_helper.php';
+require_once __DIR__ . '/../config/jwt_helper.php';
 
 // Accept requests in both arrays and json format
 if(is_array($_REQUEST)) $request = $_REQUEST;
 else $request = json_decode($_REQUEST, true);
 
-if(!isset($request['r'])) return outputJSON([SUCCESS => false, MESSAGE => 'Invalid parametes supplied']);
+if(!isset($request['r'])) return outputJSON([SUCCESS => false, MESSAGE => 'Invalid parameters supplied']);
 
 $userData = verifyToken(getValue($request, TOKEN));
 
@@ -31,7 +31,7 @@ if($request['r'] == 'post_a_job'){
 	$job_category = getValue($request, 'category');
 	
 	// Get user details from the token
-	$job_poster_user_id = $userData['user_id'];
+	$job_poster_user_id = $userData['userid'];
 	$username = $userData['username'];
 	
     $res = $ctrl->createJob($job_poster_user_id, $username, $job_title, $company_name, $location, $job_description, $specification, $job_type, $preferred_years_of_experience, $salary, $dead_line, $contact_phone, $contact_email, $contact_name, $job_category);
@@ -49,7 +49,8 @@ if($request['r'] == 'view_posted_jobs'){
 }
 
 if($request['r'] == 'view_applied_jobs'){
-	$result = $ctrl->loadUsersAppliedJobs($userData['user_id']);
+
+	$result = $ctrl->loadUsersAppliedJobs($userData['userid']);
    	return outputJSON([SUCCESS => true, 'result' => $result]);
 }
 
@@ -69,7 +70,7 @@ if($request['r'] == 'post_space'){
 //    }
 	$rent_image = '';
 	
-  	$job_poster_user_id = $userData['user_id'];
+  	$job_poster_user_id = $userData['userid'];
 	$username = $userData['username'];
 	
     $res = $ctrl->createspace($job_poster_user_id, $username, $space_title, $amount, $address, $email, $phone, $space_description, $rent_image);
@@ -99,7 +100,7 @@ if($request['r'] == 'rent_space'){
 //             $rent_image = $uIDGenerator;
 //     }
 	
-	$poster_user_id = $userData['user_id'];
+	$poster_user_id = $userData['userid'];
 	
     $res = $ctrl->createpost($poster_user_id, $post_title, $address, $type, $email, $phone, $size, $description, $rent_image);
     
@@ -112,7 +113,7 @@ if($request['r'] == 'rent_space'){
 }
 // Retrieves load listings plus services & product listings
 if($request['r'] == 'services_retrieve_listings'){
-	$loadListingIDs = $ctrl->loadListingID($userData['user_id']);
+	$loadListingIDs = $ctrl->loadListingID($userData['userid']);
 	$loadService_and_products = $ctrl->service_and_product_list();
 
 	$result = ['load_listings' => $loadListingIDs, 'services_and_products' => $loadService_and_products];
@@ -144,7 +145,35 @@ if($request['r'] == 'register_service_product'){
 	}
 	
 }
+if($request['r'] == 'all_pricing'){
+	$result = $ctrl->loadAllPrice();
+	$products = [];
+	foreach($result as $pv){
+		$products[] = $ctrl->loadSingleProducts($pv['pid']);
+	}
+	return outputJSON([SUCCESS => true, 'result' => [$result, $products]]);
+	// return outputJSON([SUCCESS => true, 'result' => $result, 'products' => $products]);
+}
+if($request['r'] == 'view_advertisement'){
+	$loadAll_PostedJobs = $ctrl->view_advertise($userData['userid']);
+	return outputJSON([SUCCESS => true, 'result' => $loadAll_PostedJobs]);
+}
+if($request['r'] == 'register_order'){
+	require_once 'user_order.php';
+	return;
+}
+if($request['r'] == 'transaction_methods'){
+	
+	$transaction_methods = getValue($request, 'selected_methods', '');
 
+    $res = $ctrl->transaction_method($userData['username'], $transaction_methods);
+	
+    if ($res == 1) {
+		return outputJSON([SUCCESS => true, MESSAGE => 'Transaction method saved successfully!']);
+	} else {
+		return outputJSON([SUCCESS => false, MESSAGE => 'Data recording failed!']);
+	}
+}
 
 
 

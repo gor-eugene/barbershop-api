@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../config/k.php';
 require_once __DIR__ .  '/../../api/controller/Controller.php';
-require_once __DIR_ . '/../config/jwt_helper.php';
+require_once __DIR__ . '/../config/jwt_helper.php';
 
 // Accept requests in both arrays and json format
 if(is_array($_REQUEST)) $request = $_REQUEST;
@@ -35,6 +35,7 @@ if($request['r'] == 'login'){
 	// This Token will be encoded with JWT
 	$token = JWT::encode($data, SECRET_KEY);
 
-	return outputJSON([SUCCESS => true, MESSAGE => 'Login successful', TOKEN => $token]);
+	return outputJSON([SUCCESS => true, MESSAGE => 'Login successful', 
+			TOKEN => $token, 'user_details' => $data]);
 
 }
